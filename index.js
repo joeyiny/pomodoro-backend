@@ -19,6 +19,9 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("outie");
   });
+  socket.on("button-press", () => {
+    console.log("Button pressed");
+  });
 });
 
 server.listen(3001, () => {
