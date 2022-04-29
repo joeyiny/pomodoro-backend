@@ -2,9 +2,11 @@
   "name": "pomodoro-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "./node_modules/nodemon/bin/nodemon.js",
+    "start:prod": "npm run build && node ./dist/index.js",
+    "build": "npx tsc"
   },
   "author": "",
   "license": "ISC",
@@ -13,5 +15,11 @@
     "express": "^4.18.0",
     "nodemon": "^2.0.15",
     "socket.io": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/node": "^17.0.30",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.4"
   }
 }
