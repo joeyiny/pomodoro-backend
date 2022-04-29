@@ -103,10 +103,12 @@ io.on("connection", (socket) => {
   io.emit("timer-toggle", timerOn);
   io.emit("timer-tick", secondsOnTimer);
   io.emit("set-session-type", sessionType);
+  socket.broadcast.emit("new-user-connected");
   io.emit("connected-users", connectedUsers);
   socket.on("disconnect", () => {
     console.log("a user disconnected");
     connectedUsers--;
+    io.emit("user-disconnected");
     io.emit("connected-users", connectedUsers);
   });
   socket.on("toggle-button-press", () => {
