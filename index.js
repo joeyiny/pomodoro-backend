@@ -19,6 +19,33 @@ let interval = null;
 let secondsOnTimer = 25 * 60;
 let sessionType = "Pomodoro";
 
+let reset = (type) => {
+  let minutesToCountdown;
+  switch (type) {
+    case "Pomodoro":
+      minutesToCountdown = 25;
+      break;
+    case "Short Break":
+      minutesToCountdown = 5;
+      break;
+    case "Long Break":
+      minutesToCountdown = 15;
+      break;
+  }
+  // toggleTimer();
+  timerOn = false;
+  secondsOnTimer = minutesToCountdown * 60;
+  io.emit("timer-toggle", timerOn);
+  io.emit("timer-tick", secondsOnTimer);
+  // stop();
+};
+
+let setSessionType = (type) => {
+  sessionType = type;
+  reset(sessionType);
+  io.emit("set-session-type", sessionType);
+};
+
 let decrement = () => {
   if (timerOn) return;
   if (secondsOnTimer >= 60) secondsOnTimer -= 60;
@@ -57,7 +84,9 @@ io.on("connection", (socket) => {
   socket.on("increment-button-press", () => {
     increment();
   });
-  socket.on("session-type-switch", () => {});
+  socket.on("session-type-switch", (data) => {
+    setSessionType(data);
+  });
 });
 
 server.listen(3001, () => {
