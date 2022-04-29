@@ -62,25 +62,40 @@ let increment = () => {
 let toggleTimer = (socket) => {
   timerOn = !timerOn;
   io.emit("timer-toggle", timerOn);
-  timerOn
-    ? (interval = setInterval(() => {
-        if (secondsOnTimer <= 0) {
-          io.emit("timer-toggle", timerOn);
-          io.emit("timer-tick", secondsOnTimer);
-          if (sessionType === "Pomodoro") {
-            io.emit("completed-pomo");
-            setSessionType("Short Break");
-          } else {
-            setSessionType("Pomodoro");
-          }
-          clearInterval(interval);
-          return;
-        }
-
-        secondsOnTimer--;
-        io.emit("timer-tick", secondsOnTimer);
-      }, 1000))
-    : clearInterval(interval);
+  if (timerOn) {
+    if (secondsOnTimer <= 0) {
+      timerOn = false;
+      io.emit("timer-toggle", timerOn);
+      io.emit("timer-tick", secondsOnTimer);
+      if (sessionType === "Pomodoro") {
+        io.emit("completed-pomo");
+        setSessionType("Short Break");
+      } else {
+        setSessionType("Pomodoro");
+      }
+      io.emit("timer-complete");
+      clearInterval(interval);
+      return;
+    }
+    interval = setInterval(() => {
+      secondsOnTimer--;
+      io.emit("timer-tick", secondsOnTimer);
+    }, 1000);
+    if (secondsOnTimer <= 0) {
+      timerOn = false;
+      io.emit("timer-toggle", timerOn);
+      io.emit("timer-tick", secondsOnTimer);
+      if (sessionType === "Pomodoro") {
+        io.emit("completed-pomo");
+        setSessionType("Short Break");
+      } else {
+        setSessionType("Pomodoro");
+      }
+      io.emit("timer-complete");
+      clearInterval(interval);
+      return;
+    }
+  } else clearInterval(interval);
 };
 
 io.on("connection", (socket) => {
