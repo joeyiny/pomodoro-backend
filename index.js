@@ -64,7 +64,20 @@ let toggleTimer = (socket) => {
   io.emit("timer-toggle", timerOn);
   timerOn
     ? (interval = setInterval(() => {
-        console.log(--secondsOnTimer);
+        if (secondsOnTimer <= 0) {
+          io.emit("timer-toggle", timerOn);
+          io.emit("timer-tick", secondsOnTimer);
+          if (sessionType === "Pomodoro") {
+            io.emit("completed-pomo");
+            setSessionType("Short Break");
+          } else {
+            setSessionType("Pomodoro");
+          }
+          clearInterval(interval);
+          return;
+        }
+
+        secondsOnTimer--;
         io.emit("timer-tick", secondsOnTimer);
       }, 1000))
     : clearInterval(interval);
