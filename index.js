@@ -19,6 +19,19 @@ let interval = null;
 let secondsOnTimer = 25 * 60;
 let sessionType = "Pomodoro";
 
+let decrement = () => {
+  if (timerOn) return;
+  if (secondsOnTimer >= 60) secondsOnTimer -= 60;
+  else secondsOnTimer = 0;
+  io.emit("timer-tick", secondsOnTimer);
+};
+
+let increment = () => {
+  if (timerOn) return;
+  secondsOnTimer += 60;
+  io.emit("timer-tick", secondsOnTimer);
+};
+
 let toggleTimer = (socket) => {
   timerOn = !timerOn;
   io.emit("timer-toggle", timerOn);
@@ -38,8 +51,12 @@ io.on("connection", (socket) => {
   socket.on("toggle-button-press", () => {
     toggleTimer(socket);
   });
-  socket.on("decrement-button-press", () => {});
-  socket.on("increment-button-press", () => {});
+  socket.on("decrement-button-press", () => {
+    decrement();
+  });
+  socket.on("increment-button-press", () => {
+    increment();
+  });
   socket.on("session-type-switch", () => {});
 });
 
