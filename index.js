@@ -72,8 +72,11 @@ let toggleTimer = (socket) => {
 
 io.on("connection", (socket) => {
   console.log("a user connected");
+  io.emit("timer-toggle", timerOn);
+  io.emit("timer-tick", secondsOnTimer);
+  io.emit("set-session-type", sessionType);
   socket.on("disconnect", () => {
-    console.log("outie");
+    console.log("a user disconnected");
   });
   socket.on("toggle-button-press", () => {
     toggleTimer(socket);
