@@ -3,6 +3,7 @@ const app = express();
 const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
+const { v4: uuidV4 } = require("uuid");
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -127,9 +128,22 @@ io.on("connection", (socket) => {
       setSessionType(roomCode, sessionType);
     }
   );
+  socket.on("create-room", (userName: string, cb: (arg0: string) => {}) => {
+    let roomCode = uuidV4();
+    let user = { roomCode, userName };
+    users[socket.id] = user;
+    rooms[roomCode] = {
+      interval: null,
+      timerOn: false,
+      secondsOnTimer: 25 * 60,
+      sessionType: SessionType.POMODORO,
+      connectedUsers: [],
+    };
+    cb(roomCode);
+  });
   socket.on("join-room", ({ roomCode, userName }) => {
     let user = { roomCode, userName };
-    users[socket.id] = { roomCode, userName };
+    users[socket.id] = user;
     if (!(roomCode in rooms)) {
       rooms[roomCode] = {
         interval: null,
