@@ -142,17 +142,16 @@ io.on("connection", (socket) => {
     cb(roomCode);
   });
   socket.on("join-room", ({ roomCode, userName }) => {
+    if (!(roomCode in rooms)) return;
     let user = { roomCode, userName };
     users[socket.id] = user;
-    if (!(roomCode in rooms)) {
-      rooms[roomCode] = {
-        interval: null,
-        timerOn: false,
-        secondsOnTimer: 25 * 60,
-        sessionType: SessionType.POMODORO,
-        connectedUsers: [],
-      };
-    }
+    rooms[roomCode] = {
+      interval: null,
+      timerOn: false,
+      secondsOnTimer: 25 * 60,
+      sessionType: SessionType.POMODORO,
+      connectedUsers: [],
+    };
 
     let room = rooms[roomCode];
     room["connectedUsers"].push(user);
