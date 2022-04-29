@@ -18,6 +18,7 @@ let timerOn = false;
 let interval = null;
 let secondsOnTimer = 25 * 60;
 let sessionType = "Pomodoro";
+let connectedUsers = 0;
 
 let reset = (type) => {
   let minutesToCountdown;
@@ -32,12 +33,10 @@ let reset = (type) => {
       minutesToCountdown = 15;
       break;
   }
-  // toggleTimer();
   timerOn = false;
   secondsOnTimer = minutesToCountdown * 60;
   io.emit("timer-toggle", timerOn);
   io.emit("timer-tick", secondsOnTimer);
-  // stop();
 };
 
 let setSessionType = (type) => {
@@ -100,11 +99,15 @@ let toggleTimer = (socket) => {
 
 io.on("connection", (socket) => {
   console.log("a user connected");
+  connectedUsers++;
   io.emit("timer-toggle", timerOn);
   io.emit("timer-tick", secondsOnTimer);
   io.emit("set-session-type", sessionType);
+  io.emit("connected-users", connectedUsers);
   socket.on("disconnect", () => {
     console.log("a user disconnected");
+    connectedUsers--;
+    io.emit("connected-users", connectedUsers);
   });
   socket.on("toggle-button-press", () => {
     toggleTimer(socket);
