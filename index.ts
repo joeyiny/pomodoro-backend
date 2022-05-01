@@ -59,8 +59,6 @@ let reset = (roomCode: string, sessionType: SessionType) => {
 };
 
 let setSessionType = (roomCode: string, sessionType: SessionType) => {
-  // console.log(rooms[roomCode.toString()]);
-  // console.log(rooms);
   let room = rooms[roomCode];
   if (room.timerOn) return;
   room.sessionType = sessionType;
@@ -150,13 +148,6 @@ io.on("connection", (socket) => {
     if (!(roomCode in rooms)) return;
     let user = { roomCode, userName };
     users[socket.id] = user;
-    rooms[roomCode] = {
-      interval: null,
-      timerOn: false,
-      secondsOnTimer: 25 * 60,
-      sessionType: SessionType.POMODORO,
-      connectedUsers: [],
-    };
 
     let room = rooms[roomCode];
     room["connectedUsers"].push(user);
@@ -170,7 +161,8 @@ io.on("connection", (socket) => {
     io.to(roomCode).emit("timer-tick", room.secondsOnTimer);
     io.to(roomCode).emit("set-session-type", room.sessionType);
 
-    console.log(`${userName} has joined ${roomCode}`);
+    // console.log(`${userName} has joined ${roomCode}`);
+    console.log(room);
   });
 });
 
