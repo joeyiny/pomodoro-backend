@@ -59,6 +59,9 @@ let reset = (roomCode: string, sessionType: SessionType) => {
 };
 
 let setSessionType = (roomCode: string, sessionType: SessionType) => {
+  // console.log(rooms[roomCode.toString()]);
+  // console.log(rooms);
+  console.log(roomCode);
   rooms[roomCode].sessionType = sessionType;
   reset(roomCode, sessionType);
   io.to(roomCode).emit("set-session-type", sessionType);
@@ -74,13 +77,16 @@ let decrement = (roomCode: string) => {
 
 let increment = (roomCode: string) => {
   let room = rooms[roomCode];
-  if (room.roomtimerOn) return;
+  if (room.timerOn) return;
   room.secondsOnTimer += 60;
   io.emit("timer-tick", room.secondsOnTimer);
 };
 
 let toggleTimer = (roomCode: string, socket) => {
+  console.log(roomCode);
   let room = rooms[roomCode];
+  console.log(room);
+
   room.timerOn = !room.timerOn;
   io.to(roomCode).emit("timer-toggle", room.timerOn);
   if (room.timerOn) {
