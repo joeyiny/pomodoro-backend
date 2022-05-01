@@ -26,16 +26,20 @@ type User = {
   roomCode: string;
 };
 
+interface Users {
+  [key: string]: User;
+}
+
 type Room = {
   interval: NodeJS.Timer;
   timerOn: boolean;
   secondsOnTimer: number;
   sessionType: SessionType;
-  connectedUsers: Array<User>;
+  connectedUsers: Users;
 };
 
 let rooms = <Array<Room>>{};
-let users = <Array<User>>{};
+let allConnectedUsers: Users = {};
 
 let reset = (roomCode: string, sessionType: SessionType) => {
   let minutesToCountdown: number;
@@ -110,11 +114,13 @@ let toggleTimer = (roomCode: string, socket) => {
 
 io.on("connection", (socket) => {
   socket.on("disconnect", () => {
-    if (!users[socket.id]) return;
-    let roomCode = users[socket.id].roomCode;
-    delete users[socket.id];
+    if (!allConnectedUsers[socket.id]) return;
+    let roomCode = allConnectedUsers[socket.id].roomCode;
+    let room = rooms[roomCode];
+    delete allConnectedUsers[socket.id];
     delete rooms[roomCode]["connectedUsers"][socket.id];
-    io.to(roomCode).emit("connected-users", rooms[roomCode]["connectedUsers"]);
+    io.to(roomCode).emit("connected-users", room["connectedUsers"]);
+    console.log(`User ${socket.id} has disconnected`);
   });
   socket.on("toggle-button-press", (roomCode: string) => {
     toggleTimer(roomCode, socket);
@@ -134,23 +140,23 @@ io.on("connection", (socket) => {
   socket.on("create-room", (userName: string, cb: (arg0: string) => {}) => {
     let roomCode = uuidV4();
     let user = { roomCode, userName };
-    users[socket.id] = user;
+    allConnectedUsers[socket.id] = user;
     rooms[roomCode] = {
       interval: null,
       timerOn: false,
       secondsOnTimer: 25 * 60,
       sessionType: SessionType.POMODORO,
-      connectedUsers: [],
+      connectedUsers: {},
     };
     cb(roomCode);
   });
   socket.on("join-room", ({ roomCode, userName }) => {
     if (!(roomCode in rooms)) return;
     let user = { roomCode, userName };
-    users[socket.id] = user;
+    allConnectedUsers[socket.id] = user;
 
     let room = rooms[roomCode];
-    room["connectedUsers"].push(user);
+    room["connectedUsers"][socket.id] = user;
 
     socket.join(roomCode);
     io.to(roomCode).emit("connected-users", room["connectedUsers"]);
@@ -160,8 +166,6 @@ io.on("connection", (socket) => {
     io.to(roomCode).emit("timer-toggle", room.timerOn);
     io.to(roomCode).emit("timer-tick", room.secondsOnTimer);
     io.to(roomCode).emit("set-session-type", room.sessionType);
-
-    // console.log(`${userName} has joined ${roomCode}`);
     console.log(room);
   });
 });
