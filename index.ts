@@ -57,7 +57,7 @@ let reset = (roomCode: string, sessionType: SessionType) => {
   }
 
   room.timerOn = false;
-  room.secondsOnTimer = minutesToCountdown * 60;
+  room.secondsOnTimer = 3; //minutesToCountdown * 60;
   io.to(roomCode).emit("timer-toggle", room.timerOn);
   io.to(roomCode).emit("timer-tick", room.secondsOnTimer);
 };
@@ -90,24 +90,25 @@ let toggleTimer = (roomCode: string, socket) => {
 
   room.timerOn = !room.timerOn;
   io.to(roomCode).emit("timer-toggle", room.timerOn);
+
   if (room.timerOn) {
-    if (room.secondsOnTimer <= 0) {
-      room.timerOn = false;
-      io.to(roomCode).emit("timer-toggle", room.timerOn);
-      io.to(roomCode).emit("timer-tick", room.secondsOnTimer);
-      if (room.sessionType === SessionType.POMODORO) {
-        io.to(roomCode).emit("completed-pomo");
-        setSessionType(roomCode, SessionType.SHORTBREAK);
-      } else {
-        setSessionType(roomCode, SessionType.POMODORO);
-      }
-      io.to(roomCode).emit("timer-complete");
-      clearInterval(room.interval);
-      return;
-    }
     room.interval = setInterval(() => {
       room.secondsOnTimer--;
       io.to(roomCode).emit("timer-tick", room.secondsOnTimer);
+      if (room.secondsOnTimer <= 0) {
+        room.timerOn = false;
+        if (room.sessionType === SessionType.POMODORO) {
+          io.to(roomCode).emit("completed-pomo");
+          setSessionType(roomCode, SessionType.SHORTBREAK);
+        } else {
+          setSessionType(roomCode, SessionType.POMODORO);
+        }
+        io.to(roomCode).emit("timer-complete");
+        io.to(roomCode).emit("timer-toggle", room.timerOn);
+        clearInterval(room.interval);
+        reset(roomCode, room.sessionType);
+        return;
+      }
     }, 1000);
   } else clearInterval(room.interval);
 };
