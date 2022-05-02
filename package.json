@@ -1,7 +1,7 @@
 {
   "name": "pomodoro-backend",
   "version": "1.0.0",
-  "description": "s",
+  "description": "",
   "main": "index.ts",
   "scripts": {
     "start": "nodemon index.js",
