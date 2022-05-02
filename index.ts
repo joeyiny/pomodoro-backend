@@ -57,7 +57,7 @@ let reset = (roomCode: string, sessionType: SessionType) => {
   }
 
   room.timerOn = false;
-  room.secondsOnTimer = 3; //minutesToCountdown * 60;
+  room.secondsOnTimer = minutesToCountdown * 60;
   io.to(roomCode).emit("timer-toggle", room.timerOn);
   io.to(roomCode).emit("timer-tick", room.secondsOnTimer);
 };
