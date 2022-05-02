@@ -168,6 +168,10 @@ io.on("connection", (socket) => {
     io.to(roomCode).emit("set-session-type", room.sessionType);
     console.log(room);
   });
+  socket.on("check-if-room-exists", (roomCode, cb) => {
+    if (roomCode in rooms) cb({ roomCode: roomCode, exists: true });
+    else cb({ roomCode: roomCode, exists: false });
+  });
 });
 
 server.listen(3001, () => {
