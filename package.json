@@ -5,7 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "start": "./node_modules/nodemon/bin/nodemon.js",
-    "start:prod": "npm run build && node index.js",
+    "start:prod": "node index.js",
     "build": "tsc"
   },
   "author": "",
