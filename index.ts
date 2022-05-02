@@ -150,8 +150,11 @@ io.on("connection", (socket) => {
     };
     cb(roomCode);
   });
-  socket.on("join-room", ({ roomCode, userName }) => {
-    if (!(roomCode in rooms)) return;
+  socket.on("join-room", ({ roomCode, userName }, cb) => {
+    if (!(roomCode in rooms)) {
+      cb(false);
+      return;
+    }
     let user = { roomCode, userName };
     allConnectedUsers[socket.id] = user;
 
@@ -166,7 +169,7 @@ io.on("connection", (socket) => {
     io.to(roomCode).emit("timer-toggle", room.timerOn);
     io.to(roomCode).emit("timer-tick", room.secondsOnTimer);
     io.to(roomCode).emit("set-session-type", room.sessionType);
-    console.log(room);
+    cb(true);
   });
   socket.on("check-if-room-exists", (roomCode, cb) => {
     if (roomCode in rooms) cb({ roomCode: roomCode, exists: true });
