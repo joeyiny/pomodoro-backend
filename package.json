@@ -5,8 +5,8 @@
   "main": "index.ts",
   "scripts": {
     "start": "./node_modules/nodemon/bin/nodemon.js",
-    "start:prod": "npm run build && node ./dist/index.js",
-    "build": "npx tsc"
+    "start:prod": "npm run build && node index.js",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
