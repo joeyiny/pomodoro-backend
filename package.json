@@ -1,7 +1,7 @@
 {
   "name": "pomodoro-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "s",
   "main": "index.ts",
   "scripts": {
     "start": "node index.js",
