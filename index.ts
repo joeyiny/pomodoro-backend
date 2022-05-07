@@ -4,12 +4,19 @@ const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const { v4: uuidV4 } = require("uuid");
+const { ExpressPeerServer } = require("peer");
 const io = new Server(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
   },
 });
+
+const peerServer = ExpressPeerServer(server, {
+  debug: true,
+});
+
+app.use("/peerjs", peerServer);
 
 app.get("/", (req, res) => {
   res.send("f");
@@ -121,6 +128,7 @@ io.on("connection", (socket) => {
     delete allConnectedUsers[socket.id];
     delete rooms[roomCode]["connectedUsers"][socket.id];
     io.to(roomCode).emit("connected-users", room["connectedUsers"]);
+    io.to(roomCode).emit("user-disconnected", socket.id);
     console.log(`User ${socket.id} has disconnected`);
   });
   socket.on("toggle-button-press", (roomCode: string) => {
@@ -131,6 +139,11 @@ io.on("connection", (socket) => {
   });
   socket.on("increment-button-press", (roomCode: string) => {
     increment(roomCode);
+  });
+  socket.on("video-ready", (roomCode: string) => {
+    console.log("video ready: " + socket.id + ". room code: " + roomCode);
+    io.to(roomCode).emit("connected-users", rooms[roomCode]["connectedUsers"]);
+    io.to(roomCode).emit("new-user-joined-video", socket.id);
   });
   socket.on(
     "session-type-switch",
@@ -164,7 +177,7 @@ io.on("connection", (socket) => {
 
     socket.join(roomCode);
     io.to(roomCode).emit("connected-users", room["connectedUsers"]);
-    socket.broadcast.to(roomCode).emit("new-user-connected");
+    socket.broadcast.to(roomCode).emit("new-user-connected", socket.id);
     socket.emit("joined-room", roomCode);
 
     io.to(roomCode).emit("timer-toggle", room.timerOn);
