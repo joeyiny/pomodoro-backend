@@ -60,6 +60,59 @@ app.post("/register", async (req, res) => {
   res.json({ message: "Success" });
 });
 
+app.post("/login", async (req, res) => {
+  const userLoggingIn = req.body;
+
+  User.findOne({ email: userLoggingIn.email }).then((dbUser) => {
+    if (!dbUser) {
+      return res.json({ message: "No user with this email" });
+    }
+    bcrypt
+      .compare(userLoggingIn.password, dbUser.password)
+      .then((isCorrect) => {
+        if (!isCorrect) {
+          return res.json({
+            message: "Invalid email/password",
+          });
+        }
+        const payload = { id: dbUser._id, displayName: dbUser.displayName };
+        jwt.sign(
+          payload,
+          "i heart pokemon and ethereum",
+          { expiresIn: 86400 },
+          (err, token) => {
+            if (err) return res.json({ message: err });
+            return res.json({ message: "Success", token: "Bearer " + token });
+          }
+        );
+      });
+  });
+});
+
+let verifyJWT = (req, res, next) => {
+  const token = req.headers["x-access-token"]?.split(" ")[1];
+
+  if (token) {
+    jwt.verify(token, "i heart pokemon and ethereum", (err, decoded) => {
+      if (err)
+        return res.json({
+          isLoggedIn: false,
+          message: "failed to auth",
+        });
+      req.user = {};
+      req.user.id = decoded.is;
+      req.user.displayName = decoded.displayName;
+      next();
+    });
+  } else {
+    res.json({ message: "Incorrect Token Given", isLoggedIn: false });
+  }
+};
+
+app.get("/getName", verifyJWT, (req, res) => {
+  res.json({ isLoggedIn: true, displayName: req.user.displayName });
+});
+
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`listening on *:${PORT}`);
