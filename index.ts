@@ -1,5 +1,7 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
+app.use(cors());
 const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
@@ -9,12 +11,14 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
 const io = new Server(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
   },
 });
+
 require("./room")(io);
 import { User } from "./models/user";
 
@@ -33,18 +37,18 @@ mongoose.connect(
 app.use("/peerjs", peerServer);
 
 app.get("/", (req, res) => {
-  res.send("f");
-  const kitty = new User({
-    email: "joeyainy@gmail.com",
-    displayName: "Joey Iny",
-    password: "123",
-  });
-  kitty.save().then(() => console.log("meow"));
+  res.send("pomo api");
+  // const kitty = new User({
+  //   email: "joeyain1y@gmail.com",
+  //   displayName: "Joey Iny",
+  //   password: "123",
+  // });
+  // kitty.save().then(() => console.log("meow"));
 });
 
 app.post("/register", async (req, res) => {
   const user = req.body;
-  const takenEmail = await User.findOne({ username: user.username });
+  const takenEmail = await User.findOne({ email: user.email });
   if (takenEmail) {
     res.json({ message: "Email is already in use" });
     return;
