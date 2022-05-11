@@ -38,12 +38,6 @@ app.use("/peerjs", peerServer);
 
 app.get("/", (req, res) => {
   res.send("pomo api");
-  // const kitty = new User({
-  //   email: "joeyain1y@gmail.com",
-  //   displayName: "Joey Iny",
-  //   password: "123",
-  // });
-  // kitty.save().then(() => console.log("meow"));
 });
 
 app.post("/register", async (req, res) => {
@@ -113,7 +107,7 @@ let verifyJWT = (req, res, next) => {
   }
 };
 
-app.get("/getName", verifyJWT, (req, res) => {
+app.post("/isUserAuth", verifyJWT, (req, res) => {
   res.json({ isLoggedIn: true, displayName: req.user.displayName });
 });
 
