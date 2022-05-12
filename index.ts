@@ -73,14 +73,18 @@ app.post("/login", async (req, res) => {
             message: "Invalid email/password",
           });
         }
-        const payload = { id: dbUser._id, displayName: dbUser.displayName };
+        const payload = { id: dbUser._id, user: dbUser };
         jwt.sign(
           payload,
           "i heart pokemon and ethereum",
           { expiresIn: 86400 },
           (err, token) => {
             if (err) return res.json({ message: err });
-            return res.json({ message: "Success", token: "Bearer " + token });
+            return res.json({
+              message: "Success",
+              token: "Bearer " + token,
+              user: dbUser,
+            });
           }
         );
       });
@@ -97,9 +101,8 @@ let verifyJWT = (req, res, next) => {
           isLoggedIn: false,
           message: "failed to auth",
         });
-      req.user = {};
-      req.user.id = decoded.is;
-      req.user.displayName = decoded.displayName;
+      req.user = decoded.user;
+      delete req.user.password;
       next();
     });
   } else {
@@ -108,7 +111,7 @@ let verifyJWT = (req, res, next) => {
 };
 
 app.post("/isUserAuth", verifyJWT, (req, res) => {
-  res.json({ isLoggedIn: true, displayName: req.user.displayName });
+  res.json({ isLoggedIn: true, user: req.user });
 });
 
 const PORT = process.env.PORT || 3000;
