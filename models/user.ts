@@ -11,6 +11,12 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    completedPomodoros: [
+      {
+        date: Date,
+        minutes: { type: Number, required: false },
+      },
+    ],
   },
   { timeStamps: true }
 );

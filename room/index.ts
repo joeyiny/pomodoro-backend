@@ -1,3 +1,6 @@
+import moment from "moment";
+import { User } from "../models/user";
+
 const { v4: uuidV4 } = require("uuid");
 
 enum SessionType {
@@ -6,14 +9,15 @@ enum SessionType {
   LONGBREAK = "Long Break",
 }
 
-type User = {
-  userName: string;
+interface IUser {
+  displayName: string;
   roomCode: string;
   databaseId: string;
-};
+  completedPomodoros?: [{ date: Date; minutes: number }];
+}
 
 interface Users {
-  [key: string]: User;
+  [key: string]: IUser;
 }
 
 type Room = {
@@ -72,6 +76,33 @@ module.exports = function (io) {
     io.emit("timer-tick", room.secondsOnTimer);
   };
 
+  let updateUserPomodoros = async (roomCode: string) => {
+    let room: Room = rooms[roomCode];
+    let users: Users = room.connectedUsers;
+
+    const update = {
+      $push: {
+        completedPomodoros: { date: new Date() },
+      },
+    };
+    const options = { upsert: true, new: true, setDefaultsOnInsert: true };
+
+    for (let i in users) {
+      User.findByIdAndUpdate(
+        users[i].databaseId,
+        update,
+        options,
+        (err, docs) => {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log("Updated user: " + docs.displayName + " " + docs.email);
+          }
+        }
+      );
+    }
+  };
+
   let toggleTimer = (roomCode: string, socket) => {
     let room = rooms[roomCode];
 
@@ -86,6 +117,8 @@ module.exports = function (io) {
           room.timerOn = false;
           if (room.sessionType === SessionType.POMODORO) {
             io.to(roomCode).emit("completed-pomo");
+            updateUserPomodoros(roomCode);
+
             setSessionType(roomCode, SessionType.SHORTBREAK);
           } else {
             setSessionType(roomCode, SessionType.POMODORO);
@@ -135,9 +168,9 @@ module.exports = function (io) {
     );
     socket.on(
       "create-room",
-      (userName: string, databaseId: string, cb: (arg0: string) => {}) => {
+      (displayName: string, databaseId: string, cb: (arg0: string) => {}) => {
         let roomCode = uuidV4();
-        let user = { roomCode, userName, databaseId };
+        let user = { roomCode, displayName, databaseId };
         allConnectedUsers[socket.id] = user;
         rooms[roomCode] = {
           interval: null,
@@ -149,12 +182,12 @@ module.exports = function (io) {
         cb(roomCode);
       }
     );
-    socket.on("join-room", ({ roomCode, userName, databaseId }, cb) => {
+    socket.on("join-room", ({ roomCode, displayName, databaseId }, cb) => {
       if (!(roomCode in rooms)) {
         cb(false);
         return;
       }
-      let user = { roomCode, userName, databaseId };
+      let user = { roomCode, displayName, databaseId };
       allConnectedUsers[socket.id] = user;
 
       let room = rooms[roomCode];
