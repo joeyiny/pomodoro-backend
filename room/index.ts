@@ -207,5 +207,17 @@ module.exports = function (io) {
       if (roomCode in rooms) cb({ roomCode: roomCode, exists: true });
       else cb({ roomCode: roomCode, exists: false });
     });
+    socket.on(
+      "chat",
+      (args: { roomCode: string; user: any; message: string }, cb) => {
+        delete args.user.password;
+        delete args.user.email;
+        delete args.user.completedPomodoros;
+        io.to(args.roomCode).emit("chat", {
+          user: args.user,
+          message: args.message,
+        });
+      }
+    );
   });
 };
