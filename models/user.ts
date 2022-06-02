@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+import { Task } from "./task";
 
 const userSchema = mongoose.Schema(
   {
@@ -15,6 +16,15 @@ const userSchema = mongoose.Schema(
       {
         date: Date,
         minutes: { type: Number, required: false },
+      },
+    ],
+    tasks: [
+      {
+        title: { type: String, required: true },
+        pomodorosCompleted: { type: Number, required: false },
+        pomodoroGoal: { type: Number, required: true },
+        completed: { type: Boolean, required: true },
+        note: { type: String, required: false },
       },
     ],
   },

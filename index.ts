@@ -54,6 +54,7 @@ app.post("/register", async (req, res) => {
     email: user.email,
     password: user.password,
     completedPomodoros: [],
+    tasks: [],
   });
   dbUser.save();
   res.json({ message: "Success" });

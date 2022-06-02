@@ -1,4 +1,3 @@
-import moment from "moment";
 import { User } from "../models/user";
 
 const { v4: uuidV4 } = require("uuid");
@@ -206,6 +205,13 @@ module.exports = function (io) {
     socket.on("check-if-room-exists", (roomCode, cb) => {
       if (roomCode in rooms) cb({ roomCode: roomCode, exists: true });
       else cb({ roomCode: roomCode, exists: false });
+    });
+    socket.on("update-tasks", async (user, tasks) => {
+      console.log(user, tasks);
+      const doc = await User.findOneAndUpdate(
+        { email: user.email },
+        { tasks: tasks }
+      );
     });
     socket.on(
       "chat",
