@@ -152,7 +152,7 @@ module.exports = function (io) {
       increment(roomCode);
     });
     socket.on("video-ready", (roomCode: string) => {
-      console.log("video ready: " + socket.id + ". room code: " + roomCode);
+      // console.log("video ready: " + socket.id + ". room code: " + roomCode);
       io.to(roomCode).emit(
         "connected-users",
         rooms[roomCode]["connectedUsers"]
@@ -207,7 +207,7 @@ module.exports = function (io) {
       else cb({ roomCode: roomCode, exists: false });
     });
     socket.on("update-tasks", async (user, tasks) => {
-      console.log(user, tasks);
+      // console.log(user, tasks);
       const doc = await User.findOneAndUpdate(
         { email: user.email },
         { tasks: tasks }
