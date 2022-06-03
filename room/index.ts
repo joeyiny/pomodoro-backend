@@ -55,6 +55,7 @@ module.exports = function (io) {
   let setSessionType = (roomCode: string, sessionType: SessionType) => {
     let room = rooms[roomCode];
     if (room.timerOn) return;
+    if (room.sessionType === SessionType.POMODORO) return;
     room.sessionType = sessionType;
     reset(roomCode, sessionType);
     io.to(roomCode).emit("set-session-type", sessionType);
@@ -63,6 +64,7 @@ module.exports = function (io) {
   let decrement = (roomCode: string) => {
     let room = rooms[roomCode];
     if (room.timerOn) return;
+    if (room.sessionType === SessionType.POMODORO) return;
     if (room.secondsOnTimer >= 60) room.secondsOnTimer -= 60;
     else room.secondsOnTimer = 0;
     io.emit("timer-tick", room.secondsOnTimer);
@@ -117,7 +119,6 @@ module.exports = function (io) {
           if (room.sessionType === SessionType.POMODORO) {
             io.to(roomCode).emit("completed-pomo");
             updateUserPomodoros(roomCode);
-
             setSessionType(roomCode, SessionType.SHORTBREAK);
           } else {
             setSessionType(roomCode, SessionType.POMODORO);
