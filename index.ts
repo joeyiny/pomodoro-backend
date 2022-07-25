@@ -112,6 +112,21 @@ let verifyJWT = (req, res, next) => {
   }
 };
 
+app.get("/user/:email", async (req, res) => {
+  // const user = req.body;
+  // res.json();
+  const user = await User.findOne(req.params);
+  if (user) {
+    res.json({
+      email: user.email,
+      displayName: user.displayName,
+      completedPomodoros: user.completedPomodoros,
+    });
+    return;
+  }
+  res.send("User not found");
+});
+
 app.post("/isUserAuth", verifyJWT, (req, res) => {
   res.json({ isLoggedIn: true, user: req.user });
 });
