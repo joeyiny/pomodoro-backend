@@ -124,7 +124,7 @@ app.get("/user/:email", async (req, res) => {
     });
     return;
   }
-  res.send("User not found");
+  res.sendStatus(404);
 });
 
 app.post("/isUserAuth", verifyJWT, (req, res) => {
