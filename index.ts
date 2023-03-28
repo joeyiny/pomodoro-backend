@@ -1,13 +1,20 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-app.use(
-  cors({
-    origin: ["http://www.pomo.wtf", "https://www.pomo.wtf"],
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+
+const isProduction = process.env.NODE_ENV === "production";
+
+const allowedOrigins = isProduction
+  ? ["http://www.pomo.wtf", "https://www.pomo.wtf"]
+  : ["http://localhost:3001", "http://127.0.0.1:3001"];
+
+const corsOptions = {
+  origin: allowedOrigins,
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
 const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
@@ -20,11 +27,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const io = new Server(server, {
-  cors: {
-    origin: ["http://www.pomo.wtf", "https://www.pomo.wtf"],
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  },
+  cors: corsOptions,
 });
 
 require("./room")(io);
