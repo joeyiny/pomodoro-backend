@@ -11,7 +11,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
+require("dotenv").config();
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -30,9 +30,7 @@ app.use(bodyParser.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
 
-mongoose.connect(
-  "mongodb+srv://joey:js5mVl3uWj9n6Pfc@pomo.bu0si.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
-);
+mongoose.connect(process.env.MONGODB_URI);
 
 app.use("/peerjs", peerServer);
 
@@ -78,7 +76,7 @@ app.post("/login", async (req, res) => {
         const payload = { id: dbUser._id, user: dbUser };
         jwt.sign(
           payload,
-          "i heart pokemon and ethereum",
+          process.env.JWT_SECRET,
           { expiresIn: 86400 },
           (err, token) => {
             if (err) return res.json({ message: err });
