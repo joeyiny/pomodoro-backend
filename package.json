@@ -4,10 +4,11 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "start": "nodemon index.js",
-    "start:prod": "node index.js",
-    "build": "tsc"
-  },
+    "start": "node index.js",
+    "start:dev": "nodemon index.ts",
+    "build": "tsc",
+    "heroku-postbuild": "tsc"
+},
   "author": "",
   "license": "ISC",
   "dependencies": {
