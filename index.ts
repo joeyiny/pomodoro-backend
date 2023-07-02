@@ -5,7 +5,11 @@ const cors = require("cors");
 const isProduction = process.env.NODE_ENV === "production";
 
 const allowedOrigins = isProduction
-  ? ["http://www.pomo.wtf", "https://www.pomo.wtf"]
+  ? [
+      "http://www.pomo.wtf",
+      "https://www.pomo.wtf",
+      "https://pomowtf-frontend.herokuapp.com",
+    ]
   : ["http://localhost:3001", "http://127.0.0.1:3001"];
 
 const corsOptions = {
