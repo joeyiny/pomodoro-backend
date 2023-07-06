@@ -25,6 +25,7 @@ type Room = {
   secondsOnTimer: number;
   sessionType: SessionType;
   connectedUsers: Users;
+  isPrivate: boolean;
 };
 
 let rooms = <Array<Room>>{};
@@ -168,7 +169,12 @@ module.exports = function (io) {
     );
     socket.on(
       "create-room",
-      (displayName: string, databaseId: string, cb: (arg0: string) => {}) => {
+      (
+        displayName: string,
+        databaseId: string,
+        cb: (arg0: string) => {},
+        isPrivate: boolean = true
+      ) => {
         let roomCode = uuidV4();
         let user = { roomCode, displayName, databaseId };
         allConnectedUsers[socket.id] = user;
@@ -178,6 +184,7 @@ module.exports = function (io) {
           secondsOnTimer: 25 * 60,
           sessionType: SessionType.POMODORO,
           connectedUsers: {},
+          isPrivate,
         };
         cb(roomCode);
       }
@@ -216,7 +223,7 @@ module.exports = function (io) {
     });
     socket.on(
       "chat",
-      (args: { roomCode: string; user: any; message: string }, cb) => {
+      (args: { roomCode: string; user: Users; message: string }, cb) => {
         delete args.user.password;
         delete args.user.email;
         delete args.user.completedPomodoros;
