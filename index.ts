@@ -10,7 +10,7 @@ const allowedOrigins = isProduction
       "https://www.pomo.wtf",
       "https://pomowtf-frontend.herokuapp.com",
     ]
-  : ["http://localhost:3001", "http://127.0.0.1:3001"];
+  : ["http://localhost:3000", "http://127.0.0.1:3000"];
 
 const corsOptions = {
   origin: function (origin, callback) {
