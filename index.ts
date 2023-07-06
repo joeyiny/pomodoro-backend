@@ -152,7 +152,7 @@ app.post("/isUserAuth", verifyJWT, (req, res) => {
   res.json({ isLoggedIn: true, user: req.user });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
   console.log(`listening on *:${PORT}`);
 });
