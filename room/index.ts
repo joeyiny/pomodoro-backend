@@ -1,3 +1,4 @@
+import { mixpanel } from "..";
 import { User } from "../models/user";
 
 const { v4: uuidV4 } = require("uuid");
@@ -99,6 +100,10 @@ module.exports = function (io) {
             console.log(err);
           } else {
             console.log("Updated user: " + docs.displayName + " " + docs.email);
+            mixpanel.track("Pomodoro completed", {
+              distinct_id: docs.id,
+              username: docs.displayName,
+            });
           }
         }
       );
@@ -186,6 +191,11 @@ module.exports = function (io) {
           connectedUsers: {},
           isPrivate,
         };
+
+        mixpanel.track("Room Created", {
+          distinct_id: user.databaseId,
+          username: user.displayName,
+        });
         cb(roomCode);
       }
     );
@@ -208,6 +218,10 @@ module.exports = function (io) {
       io.to(roomCode).emit("timer-toggle", room.timerOn);
       io.to(roomCode).emit("timer-tick", room.secondsOnTimer);
       io.to(roomCode).emit("set-session-type", room.sessionType);
+      mixpanel.track("Room Joined", {
+        distinct_id: user.databaseId,
+        username: user.displayName,
+      });
       cb(true);
     });
     socket.on("check-if-room-exists", (roomCode, cb) => {

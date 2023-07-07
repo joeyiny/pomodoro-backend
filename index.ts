@@ -1,6 +1,10 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const Mixpanel = require("mixpanel");
+
+export const mixpanel = Mixpanel.init(process.env.MIX_PANEL_TOKEN);
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -78,6 +82,10 @@ app.post("/register", async (req, res) => {
     tasks: [],
   });
   dbUser.save();
+  mixpanel.track("Signed Up", {
+    distinct_id: dbUser.id,
+    username: dbUser.displayName,
+  });
   res.json({ message: "Success" });
 });
 
@@ -103,6 +111,11 @@ app.post("/login", async (req, res) => {
           { expiresIn: 86400 },
           (err, token) => {
             if (err) return res.json({ message: err });
+
+            mixpanel.track("Logged In", {
+              distinct_id: payload.id,
+              username: dbUser.displayName,
+            });
             return res.json({
               message: "Success",
               token: "Bearer " + token,
