@@ -136,6 +136,14 @@ module.exports = function (io) {
           return;
         }
       }, 1000);
+
+      // Add Mixpanel event here
+      mixpanel.track("Timer started", {
+        distinct_id: allConnectedUsers[socket.id].databaseId,
+        username: allConnectedUsers[socket.id].displayName,
+        roomCode: roomCode,
+        sessionType: room.sessionType,
+      });
     } else clearInterval(room.interval);
   };
   io.on("connection", (socket) => {
@@ -229,7 +237,6 @@ module.exports = function (io) {
       else cb({ roomCode: roomCode, exists: false });
     });
     socket.on("update-tasks", async (user, tasks) => {
-      // console.log(user, tasks);
       const doc = await User.findOneAndUpdate(
         { email: user.email },
         { tasks: tasks }
