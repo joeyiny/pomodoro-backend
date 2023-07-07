@@ -1,13 +1,23 @@
 require("dotenv").config();
+
 const express = require("express");
-const app = express();
 const cors = require("cors");
 const Mixpanel = require("mixpanel");
+const http = require("http");
+const { Server } = require("socket.io");
+const { v4: uuidV4 } = require("uuid");
+const { ExpressPeerServer } = require("peer");
+const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
+const app = express();
+const server = http.createServer(app);
 
 export const mixpanel = Mixpanel.init(process.env.MIX_PANEL_TOKEN);
 
 const isProduction = process.env.NODE_ENV === "production";
-
 const allowedOrigins = isProduction
   ? [
       "http://www.pomo.wtf",
@@ -18,7 +28,6 @@ const allowedOrigins = isProduction
 
 const corsOptions = {
   origin: function (origin, callback) {
-    console.log("CORS origin:", origin);
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -31,30 +40,15 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-const http = require("http");
-const server = http.createServer(app);
-const { Server } = require("socket.io");
-const { v4: uuidV4 } = require("uuid");
-const { ExpressPeerServer } = require("peer");
-const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
 
-const io = new Server(server, {
-  cors: corsOptions,
-});
-
+const io = new Server(server, { cors: corsOptions });
 require("./room")(io);
+
 import { User } from "./models/user";
 
-const peerServer = ExpressPeerServer(server, {
-  debug: true,
-});
-// parse requests of content-type - application/json
+const peerServer = ExpressPeerServer(server, { debug: true });
+
 app.use(bodyParser.json());
-// parse requests of content-type - application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect(process.env.MONGODB_URI);
